@@ -31,20 +31,31 @@ html, body {
 <div id='map'></div>
 <script>
 mapboxgl.accessToken = 'pk.eyJ1IjoiY2JlZGRvdyIsImEiOiI5Q09YRG1RIn0.Izu6OPJ4CEEaSSpGuys3Xg';
+var bounds = [
+  [ 12.06298828125,
+          42.01665183556825],
+  [  14.139404296875,
+          43.389081939117496]
+];
 var map = new mapboxgl.Map({
     container: 'map',
-    style: 'mapbox://styles/mapbox/outdoors-v9',
+      style: 'mapbox://styles/cbeddow/civtqd38b00212jk1egi07z1n', //this is my custom style with no labels
+//    style: 'mapbox://styles/mapbox/outdoors-v9', //this is default style with labels
     center: [13.245149, 42.6948825],
-    zoom: 9
+    zoom: 9,
+    maxBounds: bounds
 });
-var mindate = new Date("01/01/2016").getTime()
-var maxdate = new Date("06/22/2016").getTime()
+
+var maxdate = Date.now();
+var mindate = maxdate-86400000 * 2 //set to show Mapillary sequences from last 24 hours
+
+
 map.on('style.load', function () {
   var mapillarySource = {
       type: 'vector',
       tiles: ['http://d25uarhxywzl1j.cloudfront.net/v0.1/{z}/{x}/{y}.mvt'],
       minzoom: 0,
-      maxzoom: 14
+      maxzoom: 14,
   };
   map.addControl(new mapboxgl.Navigation());
   // Add a layer showing the parcel polygons.
@@ -55,6 +66,9 @@ map.on('style.load', function () {
       'type': 'line',
       'source': 'mapillary',
       'source-layer': 'mapillary-sequences',
+      'filter': ['all',
+              ['>=', 'captured_at', mindate],
+              ['<=', 'captured_at', maxdate]],
       'layout': {
           'line-cap': 'round',
           'line-join': 'round'
